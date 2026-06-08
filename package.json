@@ -1,0 +1,19 @@
+{
+  "name": "news-portal-with-puppeteer-and-lighthouse-performance-auditing",
+  "version": "1.0.0",
+  "description": "Multi-page news portal with automated Puppeteer + Lighthouse performance audits",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test:performance": "start-server-and-test start http://localhost:3000/articles \"node tests/performance/lighthouse-articles.test.js && node tests/performance/lighthouse-detail.test.js\"",
+    "test": "npm run test:performance"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "lighthouse": "^12.6.0",
+    "puppeteer": "^24.10.2",
+    "start-server-and-test": "^2.0.8"
+  }
+}
