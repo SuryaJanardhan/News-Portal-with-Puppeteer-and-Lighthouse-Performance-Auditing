@@ -13,6 +13,23 @@ const ensureReportsDir = () => {
   }
 };
 
+const getExecutablePath = () => {
+  if (process.env.CHROME_PATH) {
+    return process.env.CHROME_PATH;
+  }
+
+  const candidates = [
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ];
+
+  return candidates.find((candidate) => fs.existsSync(candidate));
+};
+
 const assertThreshold = (condition, message) => {
   if (!condition) {
     throw new Error(message);
@@ -22,11 +39,16 @@ const assertThreshold = (condition, message) => {
 (async () => {
   let browser;
   try {
-    browser = await puppeteer.launch({
+    const launchOptions = {
       headless: true,
-      executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    };
+    const executablePath = getExecutablePath();
+    if (executablePath) {
+      launchOptions.executablePath = executablePath;
+    }
+
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     await page.goto(appUrl, { waitUntil: 'networkidle0' });

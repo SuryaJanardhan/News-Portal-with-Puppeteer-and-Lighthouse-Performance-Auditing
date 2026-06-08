@@ -1,18 +1,11 @@
 const express = require('express');
+const escapeHtml = require('escape-html');
 const { articles } = require('./data/articles');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use('/public', express.static('public'));
-
-const escapeHtml = (value) =>
-  String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
 
 const baseHtml = (title, body) => `<!doctype html>
 <html lang="en">
