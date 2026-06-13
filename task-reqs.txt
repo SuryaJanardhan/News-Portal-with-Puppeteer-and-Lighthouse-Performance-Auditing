@@ -1,0 +1,268 @@
+Objective
+Build a multi-page news portal application and implement an automated performance testing suite using Puppeteer and Lighthouse. You will learn to measure and audit Core Web Vitals, generate performance reports, and optimize frontend assets to meet a defined performance budget. This project is crucial for developing skills in ensuring applications are fast, accessible, and provide a high-quality user experience, a key requirement in modern web development.
+
+Description
+Background
+In modern web development, performance is not a feature—it's a necessity. Users expect websites to load quickly and respond smoothly. Poor performance can lead to a negative user experience, lower engagement, and reduced search engine rankings. Google's Core Web Vitals (CWV) have become a standard for measuring the health of a site, focusing on loading (Largest Contentful Paint - LCP), interactivity (First Input Delay - FID, or Total Blocking Time - TBT in lab tests), and visual stability (Cumulative Layout Shift - CLS).
+
+Automating performance testing is essential for maintaining high standards in a continuous integration environment. Tools like Puppeteer, a Node library that provides a high-level API to control headless Chrome, and Lighthouse, an open-source tool for auditing web pages, are industry standards. By integrating these tools, developers can programmatically launch a browser, navigate to pages, and run comprehensive audits to catch performance regressions before they reach production.
+
+This task challenges you to build a functional news portal and, more importantly, to create a robust performance testing suite around it. You will define a performance budget—a set of limits for metrics like load times and Lighthouse scores—and then optimize your application to meet these targets. This process mirrors how professional teams ensure their applications remain fast and reliable.
+
+Implementation Details
+Follow these steps to complete the project. You will first build the application, then implement the performance testing suite.
+
+Step 1: Project Setup
+Initialize a new frontend project using a framework of your choice (e.g., React, Vue, Svelte, or vanilla JS). Create a simple project structure. You will need to install Puppeteer and Lighthouse as development dependencies.
+
+# Example setup
+npm init -y
+npm install puppeteer lighthouse
+Your project must include a tests/performance directory for all performance-related test files and a /performance-reports directory for the outputted JSON reports.
+
+Step 2: Build the Articles Listing Page
+Create the main page at the /articles route. This page will display a list of news articles. You can use mock data for the articles; there is no need for a real backend API. The page must be structured to be testable, using data-testid attributes as specified in the requirements.
+
+The list should contain at least 20 article cards to simulate a real-world list.
+Each card should link to a unique article detail page (/article/:id).
+Implement lazy loading for article images as specified in image-lazy-loading to improve initial page load performance.
+Step 3: Build the Article Detail Page
+Create a dynamic route /article/:id that displays the full content of a selected article. This page should show more detailed information, including a title, author, date, and a substantial amount of text (at least 500 words) to simulate a real article. Include a featured image and a link to navigate back to the articles list.
+
+Step 4: Implement the Search Page
+Create a search input on the articles list page. When a user enters a query and clicks the search button, they should be taken to the /search page, which displays the filtered results. The search functionality can be a simple client-side filter of your mock data. The search page must display the original query and the number of results found.
+
+Step 5: Create the Performance Test Suite
+In the /tests/performance directory, create the required test scripts. These scripts will use Puppeteer to launch a headless browser and Lighthouse to audit your application's pages.
+
+Here is a template for a basic Lighthouse test script (lighthouse-articles.test.js):
+
+// /tests/performance/lighthouse-articles.test.js
+const puppeteer = require('puppeteer');
+const lighthouse = require('lighthouse');
+const fs = require('fs');
+
+(async () => {
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  const appUrl = 'http://localhost:3000/articles'; // Adjust port if needed
+
+  await page.goto(appUrl, { waitUntil: 'networkidle0' });
+
+  const { lhr } = await lighthouse(appUrl, {
+    port: (new URL(browser.wsEndpoint())).port,
+    output: 'json',
+    logLevel: 'info',
+  });
+
+  // Ensure the reports directory exists
+  if (!fs.existsSync('performance-reports')) {
+    fs.mkdirSync('performance-reports');
+  }
+
+  // Save the report
+  fs.writeFileSync('performance-reports/articles-lighthouse.json', JSON.stringify(lhr, null, 2));
+
+  console.log(`Lighthouse score for ${appUrl}: ${lhr.categories.performance.score * 100}`);
+
+  await browser.close();
+})();
+You will need to create similar scripts for the other required tests, ensuring they generate the specified output files and measure all required metrics. Configure your package.json to have a script that runs all performance tests.
+
+// package.json example
+{
+  "scripts": {
+    "start": "your-start-command",
+    "test:performance": "node tests/performance/lighthouse-articles.test.js && node tests/performance/lighthouse-detail.test.js"
+  }
+}
+Step 6: Optimize and Report
+Run your performance tests and analyze the reports. If your scores or metrics do not meet the performance budget defined in the requirements, you will need to optimize your application. Common optimization techniques include:
+
+Minifying CSS and JavaScript.
+Compressing images.
+Implementing lazy loading correctly.
+Reducing render-blocking resources.
+Once all requirements are met, ensure that the final run of your tests generates the required JSON files in the /performance-reports directory.
+
+Step 7: Submission Checklist
+Ensure your final submission contains all of the following artifacts:
+
+ Application source code.
+ A README.md file with clear setup and execution instructions, including the single command to run the application and tests.
+ A package.json file with all dependencies and required scripts.
+ A /tests/performance directory containing all required performance test files (lighthouse-articles.test.js, lighthouse-detail.test.js, etc.).
+ All code required to generate the performance reports as specified.
+Implementation Guidelines
+Component-Based Architecture: Structure your frontend application using components for reusability and maintainability. For example, create a reusable ArticleCard component.
+Mock Data: Create a simple JSON file or an in-memory object to serve as the source for your news articles. This avoids the complexity of a backend API and keeps the focus on the frontend and performance testing.
+CSS and Styling: Use a modern styling approach (e.g., CSS Modules, Styled Components, or a utility-first framework like Tailwind CSS). Pay attention to how CSS is loaded, as large CSS files can block rendering.
+Optimization: Focus on practical optimization techniques. Ensure images are appropriately sized, and consider using modern image formats like WebP. Use your bundler's production mode to enable minification and tree-shaking.
+Error Handling: Your performance tests should be robust. Handle potential timeouts or errors gracefully.
+These guidelines are suggestions to help you build a high-quality solution. Your final implementation choices are up to you, as long as they meet the core requirements.
+
+FAQ
+Q: Do I need a real backend or database?
+
+A: No. Mock data stored in a local JSON file or hardcoded in your application is sufficient. The focus is on frontend performance, not backend architecture.
+Q: How do I generate mock data for the articles?
+
+A: You can use online mock data generators or libraries like Faker.js to create realistic-looking article titles, excerpts, and content. Ensure your article content is long enough (500+ words) to simulate a real page.
+Q: My Lighthouse scores fluctuate slightly between runs. Is that normal?
+
+A: Yes, minor fluctuations are normal due to variations in network and CPU conditions. Run your tests multiple times to get a stable average. The verification will allow for a small margin of error, but your application should consistently meet the budget specified in lighthouse-performance-score and lighthouse-accessibility-score.
+Q: What if I can't meet the exact performance budget numbers?
+
+A: The performance budgets are a key part of the task. You should actively optimize your application to meet them. Document the optimizations you made in your README. This includes techniques like code splitting, asset compression, and lazy loading (image-lazy-loading).
+Q: Can I use a different testing tool instead of Puppeteer/Lighthouse?
+
+A: No. This task specifically requires the use of Puppeteer and Lighthouse to meet the requirements for performance testing and reporting (performance-test-structure, performance-reports-structure).
+Core Requirements
+1.
+The application must be runnable with a single command documented in the README.md file. This command should install dependencies, start the application server, and make it accessible for testing.
+
+Verification:
+
+An evaluator will clone the repository.
+The command specified in README.md will be executed.
+The application is expected to start without errors and be available at a specified port (e.g., http://localhost:3000).
+2.
+The application must render an articles listing page at the /articles route. This page must contain a list of at least 20 articles and search functionality elements.
+
+Contract Specification:
+
+Route: /articles
+Required Elements: The following data-testid attributes must be present on the page.
+data-testid="articles-list": A container for the article cards.
+data-testid="search-input": The text input for search queries.
+data-testid="search-button": The button to submit a search.
+Article Card Elements (for each article):
+data-testid="article-card-{articleId}"
+data-testid="article-title-{articleId}"
+data-testid="article-excerpt-{articleId}"
+data-testid="article-link-{articleId}"
+Verification:
+
+Navigate to the /articles route.
+Verify the presence of the articles-list, search-input, and search-button elements.
+Verify that the articles-list container holds at least 20 elements with the data-testid="article-card-{articleId}" pattern.
+3.
+The application must render an article detail page at a dynamic route like /article/:id. This page must display the full details of a single article.
+
+Contract Specification:
+
+Route: /article/:id (e.g., /article/1)
+Required Elements: The following data-testid attributes must be present on the page.
+data-testid="article-title"
+data-testid="article-author"
+data-testid="article-date"
+data-testid="article-content"
+data-testid="article-featured-image"
+data-testid="back-to-articles"
+Verification:
+
+Navigate to an article detail page (e.g., /article/1).
+Verify that all specified data-testid elements exist in the DOM.
+4.
+The application must display search results on a dedicated /search page after a query is submitted from the articles list page.
+
+Contract Specification:
+
+Route: /search
+Required Elements: The following data-testid attributes must be present on the page.
+data-testid="search-results-list": A container for the search result items.
+data-testid="search-query-display": An element displaying the term that was searched for.
+data-testid="results-count": An element displaying the number of results found.
+Verification:
+
+On the /articles page, type a query into the search-input and click the search-button.
+Verify the application navigates to the /search route.
+Verify the presence of all required data-testid elements on the /search page.
+5.
+Images on the articles list page must be lazy-loaded to improve performance. This is typically achieved using the loading="lazy" attribute.
+
+Contract Specification:
+
+All <img> tags within the data-testid="articles-list" container must have the loading="lazy" attribute.
+Verification:
+
+Navigate to the /articles page.
+Use an automated tool to inspect all <img> elements inside the articles-list container.
+Verify that each image element has the attribute loading="lazy".
+6.
+The project must include a dedicated directory for performance tests containing specific test files.
+
+Contract Specification:
+
+Directory: /tests/performance must exist in the root of the repository.
+Required Files:
+lighthouse-articles.test.js
+lighthouse-detail.test.js
+Verification:
+
+Check for the existence of the /tests/performance directory.
+Verify that both lighthouse-articles.test.js and lighthouse-detail.test.js files are present within that directory.
+7.
+Running the performance tests must generate JSON reports in a specific directory.
+
+Contract Specification:
+
+Directory: /performance-reports
+Generated Files:
+articles-lighthouse.json
+article-detail-lighthouse.json
+Verification:
+
+Execute the performance test script (e.g., npm run test:performance).
+After the script finishes, verify that the /performance-reports directory has been created.
+Verify that articles-lighthouse.json and article-detail-lighthouse.json exist within the directory and are valid JSON files.
+8.
+The application pages must meet a minimum Lighthouse performance score.
+
+Contract Specification:
+
+Metric: Lighthouse Performance Score
+Target: ≥ 85
+Files to Check:
+performance-reports/articles-lighthouse.json
+performance-reports/article-detail-lighthouse.json
+Verification:
+
+Run the performance tests to generate the reports.
+Parse both articles-lighthouse.json and article-detail-lighthouse.json.
+For each file, read the value of lhr.categories.performance.score.
+Verify that the score, when multiplied by 100, is greater than or equal to 85.
+9.
+The application pages must meet a minimum Lighthouse accessibility score.
+
+Contract Specification:
+
+Metric: Lighthouse Accessibility Score
+Target: ≥ 90
+Files to Check:
+performance-reports/articles-lighthouse.json
+performance-reports/article-detail-lighthouse.json
+Verification:
+
+Run the performance tests to generate the reports.
+Parse both articles-lighthouse.json and article-detail-lighthouse.json.
+For each file, read the value of lhr.categories.accessibility.score.
+Verify that the score, when multiplied by 100, is greater than or equal to 90.
+10.
+The main articles page must meet the specified Core Web Vitals and performance metric budgets.
+
+Contract Specification:
+
+Metrics & Budgets: | Metric | Threshold | Lighthouse JSON Path | |---|---|---| | First Contentful Paint (FCP) | ≤ 2.0s | lhr.audits['first-contentful-paint'].numericValue (ms) | | Largest Contentful Paint (LCP) | ≤ 2.5s | lhr.audits['largest-contentful-paint'].numericValue (ms) | | Cumulative Layout Shift (CLS) | ≤ 0.1 | lhr.audits['cumulative-layout-shift'].numericValue | | Total Blocking Time (TBT) | ≤ 300ms | lhr.audits['total-blocking-time'].numericValue (ms) |
+Verification:
+
+Run performance tests to generate performance-reports/articles-lighthouse.json.
+Parse the JSON file.
+Check the numeric value for each metric at its specified path.
+Verify that each value is within its required budget (note the units, ms vs s).
+
+Submission Instructions
+Submit a link to your Git repository. The repository must include all application source code and a detailed README.md file. The README must provide a single command to install dependencies, start the application, and run the performance test suite. Ensure the /tests/performance directory and all required test scripts are present. Your package.json must list all dependencies and include the necessary scripts for running the application and tests.
+
+Evaluation Overview
+Your submission will be evaluated based on functionality, code quality, and adherence to performance requirements. An automated testing process will verify each of the core requirements by running your application and performance test suite. This includes checking for the presence of required UI elements, validating the structure of test files and reports, and parsing the generated reports to ensure all performance budgets are met. Your code will also undergo automated analysis to assess its structure, readability, and adherence to best practices in frontend development and testing.

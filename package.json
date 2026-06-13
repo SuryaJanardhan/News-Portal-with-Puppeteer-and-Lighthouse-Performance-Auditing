@@ -9,8 +9,9 @@
     "test": "npm run test:performance"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "escape-html": "^1.0.3"
+    "compression": "^1.8.1",
+    "escape-html": "^1.0.3",
+    "express": "^4.21.2"
   },
   "devDependencies": {
     "lighthouse": "^12.6.0",

@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const lighthouse = require('lighthouse').default;
 const puppeteer = require('puppeteer');
 
 const appUrl = process.env.APP_URL || 'http://localhost:3000/article/1';
@@ -39,6 +38,7 @@ const assertThreshold = (condition, message) => {
 (async () => {
   let browser;
   try {
+    const lighthouse = (await import('lighthouse')).default;
     const launchOptions = {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
